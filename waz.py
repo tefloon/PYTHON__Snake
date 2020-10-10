@@ -1,73 +1,71 @@
 import pygame
-import time
 from enum import Enum
 
-class Kierunki(Enum):
+
+class Kierunek(Enum):
 	PRAWO = 1,
 	LEWO = 2,
 	GORA = 3,
 	DOL = 4
 
-# === ZMIENNE OGÓLNE ===
-WIELKOSC_OKNA = (800, 600)
-FPS = 2
 
-# === ZMIENNE PLANSZY ===
-bok = 30
-szer = 20
-wys = 15
-kolor_planszy = (10,255,10)
+class Waz(object):
+	"""docstring for Waz"""
+	def __init__(self, xp=3, yp=3, bok=30, dl=3, kg=(255,0,0), ks=(245, 123, 6), k=Kierunek.PRAWO):
+		self.bok = bok
+		self.dl = dl
+		self.kg = kg
+		self.ks = ks
+		self.k = k
 
-# === ZMIENNE WĘŻA ===
-xg = 3
-yg = 3
+		self.segmenty = []
 
-kolor_glowy = (255,0,0)
-kolor_segmentu = (230,50,50)
+		self.segmenty.append(Segment(xp, yp, bok, kg))
 
-kierunek = Kierunki.PRAWO
+		for i in range(1,dl):
+			self.segmenty.append(Segment(xp, yp+i, bok, ks))
+		
+	def rysuj(self, ekran):
+		for s in self.segmenty:
+			s.rysuj(ekran)
+
+	def przesun(self):
+		for i in range(len(self.segmenty) - 1, 0, -1):
+			self.segmenty[i].x = self.segmenty[i-1].x
+			self.segmenty[i].y = self.segmenty[i-1].y
+
+		if self.k==Kierunek.PRAWO:
+			self.segmenty[0].x += 1
+		elif self.k==Kierunek.LEWO:
+			self.segmenty[0].x -= 1
+		elif self.k==Kierunek.GORA:
+			self.segmenty[0].y -= 1
+		elif self.k==Kierunek.DOL:
+			self.segmenty[0].y += 1
+
+	def update(self, ekran):
+		self.przesun()
+		self.rysuj(ekran)
 
 
-pygame.init()
-ekran = pygame.display.set_mode(WIELKOSC_OKNA)
 
-def przesun():
-	global xg, yg
-	if kierunek == Kierunki.PRAWO:
-		xg += 1
-	if kierunek == Kierunki.LEWO:
-		xg -= 1
-	if kierunek == Kierunki.GORA:
-		yg -= 1
-	if kierunek == Kierunki.DOL:
-		yg += 1
+class Segment():
+	"""Klasa opisująca pojedynczy segment węża"""
+	def __init__(self, x=3, y=3, bok=30, kolor=(245, 123, 6)):
+		self.x = x
+		self.y = y
+		self.bok = bok
+		self.kolor = kolor
 
-	rysujKwadrat(xg * bok, yg * bok, kolor_glowy)
+	def przesun(self, x_nowy, y_nowy):
+		self.x = x_nowy
+		self.y = y_nowy
 
-def rysujKwadrat(x, y, kolor):
-	pygame.draw.rect(ekran, kolor, (x, y, bok, bok))
+	def rysuj(self, ekran):
+		g = 2
+
+		pygame.draw.rect(ekran,  (0,0,0),   (self.x * self.bok, self.y * self.bok, self.bok, self.bok))	
+		pygame.draw.rect(ekran, self.kolor, (self.x * self.bok + g, self.y * self.bok + g, self.bok - 2*g, self.bok - 2*g))	
+		
 
 
-
-while True:
-	for event in pygame.event.get():
-		# print(event)
-		if event.type == pygame.QUIT:
-			pygame.quit()
-			quit()
-
-		if event.type == pygame.KEYDOWN:
-			if event.key == pygame.K_UP:
-				kierunek = Kierunki.GORA
-			if event.key == pygame.K_DOWN:
-				kierunek = Kierunki.DOL
-			if event.key == pygame.K_LEFT:
-				kierunek = Kierunki.LEWO
-			if event.key == pygame.K_RIGHT:
-				kierunek = Kierunki.PRAWO
-			
-	ekran.fill(kolor_planszy)
-	przesun()
-	# rysujKwadrat(xg, yg, kolor_glowy)
-	pygame.display.update()
-	pygame.time.delay(100)
