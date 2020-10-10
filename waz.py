@@ -1,4 +1,5 @@
 import pygame
+import random
 from enum import Enum
 
 
@@ -17,20 +18,33 @@ class Waz(object):
 		self.kg = kg
 		self.ks = ks
 		self.k = k
+		self.czyPrzedluzyc = False
 
 		self.segmenty = []
 
 		self.segmenty.append(Segment(xp, yp, bok, kg))
 
-		for i in range(1,dl):
+		for i in range(1, dl):
 			self.segmenty.append(Segment(xp, yp+i, bok, ks))
+
+	def przedluz(self):
+		self.czyPrzedluzyc = True
 		
 	def rysuj(self, ekran):
 		for s in self.segmenty:
 			s.rysuj(ekran)
 
 	def przesun(self):
-		for i in range(len(self.segmenty) - 1, 0, -1):
+		if self.czyPrzedluzyc:
+			nowyX = self.segmenty[-1].x
+			nowyY = self.segmenty[-1].y
+			self.segmenty.append(Segment(nowyX, nowyY, self.bok, self.ks))
+			self.czyPrzedluzyc = False
+			odKonca = 2
+		else:
+			odKonca = 1
+
+		for i in range(len(self.segmenty) - odKonca, 0, -1):
 			self.segmenty[i].x = self.segmenty[i-1].x
 			self.segmenty[i].y = self.segmenty[i-1].y
 
@@ -56,6 +70,12 @@ class Segment():
 		self.y = y
 		self.bok = bok
 		self.kolor = kolor
+
+	def __eq__(self, other):
+		if self.x == other.x and self.y == other.y:
+			return True
+		else:
+			return False
 
 	def przesun(self, x_nowy, y_nowy):
 		self.x = x_nowy

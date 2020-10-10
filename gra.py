@@ -12,15 +12,26 @@ RZEDY = 20
 WIELKOSC_OKNA = (BOK*KOLUMNY, BOK*RZEDY)
 KOLOR_PLANSZY = (10,255,10)
 
+punkty = 0
+
 
 # === ZMIENNE WĘŻA === #
 xp = 3
 yp = 3
+dl = 55
 
-kolor_g = (255,0,0)
-kolor_s = (230,50,50)
+kolor_g = (255, 0, 0)
+kolor_s = (245, 123, 6)
 
-kobra = waz.Waz()
+kobra = waz.Waz(xp, yp, BOK, dl, kolor_g, kolor_s)
+
+# === ZMIENNE JAPKA === #
+xj = random.randint(0, KOLUMNY - 1)
+yj = random.randint(0, RZEDY - 1)
+
+kolor_j = (255, 0, 0)
+
+japko = waz.Segment(xj, yj, BOK, kolor_j)
 
 
 # === FUNKCJE === #
@@ -44,6 +55,27 @@ def sprawdzWejscie():
 			if event.key == pygame.K_RIGHT:
 				kobra.k = waz.Kierunek.PRAWO
 
+def noweJapko():
+	czyDobrze = False
+
+	while not czyDobrze > 0:
+		czyDobrze = True
+
+		xj = random.randint(0, KOLUMNY - 1)
+		yj = random.randint(0, RZEDY - 1)
+
+		for s in kobra.segmenty:
+			if s.x == xj and s.y == yj:
+				czyDobrze = False
+				break
+	
+	japko.przesun(xj, yj)
+
+def sprawdzKolizje():
+	if kobra.segmenty[0] == japko:
+		noweJapko()
+		kobra.przedluz()
+
 
 # === INICJALIZACJA === #
 pygame.init()
@@ -57,6 +89,9 @@ while True:
 	sprawdzWejscie()
 
 	kobra.update(ekran)
+	japko.rysuj(ekran)
+
+	sprawdzKolizje()
 
 	pygame.display.update()
 	pygame.time.delay(100)
